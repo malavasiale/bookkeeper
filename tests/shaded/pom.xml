@@ -27,9 +27,4 @@
   <groupId>org.apache.bookkeeper.tests.shaded</groupId>
   <artifactId>shaded-tests-parent</artifactId>
   <name>Apache BookKeeper :: Tests :: Test Shaded Jars</name>
-  <modules>
-    <module>bookkeeper-server-shaded-test</module>
-    <module>bookkeeper-server-tests-shaded-test</module>
-    <module>distributedlog-core-shaded-test</module>
-  </modules>
 </project>
