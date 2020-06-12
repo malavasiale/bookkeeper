@@ -2,38 +2,37 @@ package mytests;
 
 import static org.junit.Assert.*;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.bookkeeper.common.collections.BlockingMpscQueue;
-import org.junit.Before;
+import org.jctools.util.Pow2;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+
 
 public class BlockingMpscQueueTest{
 	
-	@InjectMocks
-	BlockingMpscQueue<Integer> queue = new BlockingMpscQueue<>(3);
-
+	static BlockingQueue<Integer> queue;
+	static int size = 13;
 	
-	@SuppressWarnings("unchecked")
-	@Before
-	public void initialize() {
-		queue = Mockito.spy(BlockingMpscQueue.class);
-		Mockito.when(queue.relaxedOffer(2)).thenReturn(true);
+	
+	@BeforeClass
+	public static void init() {
+		size = Pow2.roundToPowerOfTwo(size);
+		queue = new BlockingMpscQueue<>(size);
 	}
+	
+	
+    @Test
+    public void testOffer() throws Exception {
+        for (int i = 0; i < size; i++) {
+            assertTrue(queue.offer(1, 100, TimeUnit.MILLISECONDS));
+        }
 
-	@Test
-	public void offerTest() {
-		try {
-			boolean result = queue.offer(2, 1000, TimeUnit.SECONDS);
-			assertEquals(result,true);
-			//System.out.println("The result is" + result);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+        assertFalse(queue.offer(1, 100, TimeUnit.MILLISECONDS));
+        
+    }
+	
 
 }
