@@ -81,4 +81,16 @@ public class BlockingMpscQueueTest{
         
     }
     
+    @Test
+    public void testInterrupt() {
+    	Thread.currentThread().interrupt();
+    	boolean t = false;
+    	try {
+    		queue.poll(0,TimeUnit.DAYS);
+    	} catch (Exception e) {
+    		t = true;
+    	}
+    	assertTrue(t);
+    }
+    
 }
