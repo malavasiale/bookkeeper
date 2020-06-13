@@ -8,9 +8,9 @@ import org.apache.bookkeeper.common.collections.BlockingMpscQueue;
 import org.jctools.util.Pow2;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
@@ -80,6 +80,5 @@ public class BlockingMpscQueueTest{
         Assert.assertNull(queue.poll(timeout,unit));
         
     }
-	
-
+    
 }
