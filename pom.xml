@@ -784,6 +784,12 @@
       <artifactId>powermock-module-junit4</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>pl.pragmatists</groupId>
+    	<artifactId>JUnitParams</artifactId>
+    	<version>1.0.5</version>
+    	<scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
