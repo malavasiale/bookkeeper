@@ -106,10 +106,11 @@ public class BlockingMpscQueueTest{
     	/*
     	 * Controllo eccezione in caso di interrupt e offer su una lista piena.
     	 * */
-    	for(int i = 0; i <= realSize; i++) {
+    	for(int i = 0; i < realSize; i++) {
     		queue.offer(0, 0, TimeUnit.DAYS);
     	}
     	
+    	Thread.currentThread().interrupt();
     	try {
     		queue.offer(0, 1, TimeUnit.DAYS);
     	} catch (InterruptedException e) {
@@ -117,5 +118,37 @@ public class BlockingMpscQueueTest{
     	}
     	assertTrue(t);
     }
+    
+    /*
+     * Test simile a testOfferAndPoll() ma in questo caso non hanno timeout. In questo caso però
+     * non hanno nemmeno una valore di ritorno, di conseguenza testerò la lunghezza della coda
+     * per verificare il corretto funzionamento.
+     * */
+    @Test
+    @Parameters({
+    	"0,1",
+    	"1,2",
+    	"-1,3"
+    })
+    public void testTakeAndPut(int toAdd,int howMany) throws InterruptedException {
+    	
+    	/*
+    	 * Riempo la coda e controllo che la sua dimensione sia corretta
+    	 * */
+    	for(int i = 0; i < howMany ; i++) {
+    		queue.put(toAdd);
+    	}
+    	assertEquals(howMany,queue.size());
+    	
+    	/*
+    	 * Svuoto la coda e controllo che la d
+    	 * */
+    	for(int i = 0;i < howMany; i++) {
+    		queue.take();
+    	}
+    	assertEquals(0,queue.size());
+    	
+    }
+    
     
 }
