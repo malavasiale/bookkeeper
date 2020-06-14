@@ -3,7 +3,9 @@ package mytests;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -186,7 +188,7 @@ public class BlockingMpscQueueTest{
      * Se la lista non è abbastanza grande arriva a riempirla. Il valore di ritorno è la dimensione della lista
      * al termine del metodo meno la sua dimensione iniziale.
      * Category partition :
-     * Collection<T> c : {lista vuota, lista con qualche elemento , lista piena , null}
+     * Collection<T> c : {lista vuota, lista con qualche elemento , null}
      * */
     @Test
     public void testDrainTo() throws InterruptedException {
@@ -199,6 +201,27 @@ public class BlockingMpscQueueTest{
     	}
     	int addedToList = queue.drainTo(drain);
     	assertEquals(realSize,addedToList);
+    	
+    	/*Drain su una lista con qualche elemento*/
+    	drain.clear();
+    	for(int i = 0; i < realSize ; i++) {
+    		queue.put(1);
+    		if(i < realSize/2) {
+    			drain.add(1);
+    		}
+    	}
+    	addedToList = queue.drainTo(drain);
+    	assertEquals(drain.size() - realSize/2,addedToList);
+    	
+    	/*Drain su lista null*/
+    	drain = null;
+    	boolean t=false;
+    	try {
+    		queue.drainTo(drain);
+    	}catch(NullPointerException e) {
+    		t = true;
+    	}
+    	assertTrue(t);
     }
     
 }
