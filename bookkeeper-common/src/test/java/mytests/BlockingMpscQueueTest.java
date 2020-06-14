@@ -224,4 +224,44 @@ public class BlockingMpscQueueTest{
     	assertTrue(t);
     }
     
+    /*
+     * Test per il metodo drainTo(Collection<T> c, int maxElements). Serve a trasferire maxElements elementi
+     * dalla coda alla collection c.
+     * Category Partition:
+     * Collection c : {lista vuota, lista con alcuni elementi, null}
+     * int maxElements : { < 0 ; 0 ;0 < e <= realSize ; > realSize}
+     * Metodo multidimensionale
+     * */
+    @Test
+    @Parameters({
+    	"-2",
+    	"0",
+    	"8",
+    	"9"
+    })
+    public void testDrainToLimited(int limit) throws InterruptedException {
+    	int realSize = Pow2.roundToPowerOfTwo(size);
+    	
+    	
+    	List<Integer> drainLimited = new ArrayList<>();
+    	if(limit < 0) {
+    		boolean t = false;
+    		int added = queue.drainTo(drainLimited, limit);
+    		assertEquals(limit,added);
+    		
+    		queue.put(1);
+    		added = queue.drainTo(drainLimited, limit);
+    		assertEquals(limit,added);
+    		
+    		queue = null;
+    		try {
+    			added = queue.drainTo(drainLimited, limit);
+    		}catch(NullPointerException e) {
+    			t = true;
+    		}
+    		assertTrue(t);
+    	}
+    	
+    }
+    
 }
