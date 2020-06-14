@@ -1,6 +1,9 @@
 package mytests;
 
 import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -150,5 +153,24 @@ public class BlockingMpscQueueTest{
     	
     }
     
+    /*
+     * Test per il metodo drainTo(Collection c) che serve a trasferire dalla coda gli elementi in una lista.
+     * Se la lista non è abbastanza grande arriva a riempirla. Il valore di ritorno è la dimensione della lista
+     * al termine del metodo meno la sua dimensione iniziale.
+     * Category partition :
+     * Collection<T> c : {lista vuota, lista con qualche elemento , lista piena , null}
+     * */
+    @Test
+    public void testDrainTo() throws InterruptedException {
+    	int realSize = Pow2.roundToPowerOfTwo(size);
+    	
+    	/*Drain su lista vuota*/
+    	List<Integer> drain = new ArrayList<>();
+    	for(int i = 0 ; i < realSize ; i++ ) {
+    		queue.put(0);
+    	}
+    	int addedToList = queue.drainTo(drain);
+    	assertEquals(realSize,addedToList);
+    }
     
 }
