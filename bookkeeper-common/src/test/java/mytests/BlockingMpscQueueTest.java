@@ -81,13 +81,38 @@ public class BlockingMpscQueueTest{
         
     }
     
+    /*
+     * Test per verificare il lancio di InterruptedException in caso il Thread
+     * sia stato interrotto.
+     * */
     @Test
-    public void testInterrupt() {
+    public void testInterrupt() throws InterruptedException {
     	Thread.currentThread().interrupt();
+    	int realSize = Pow2.roundToPowerOfTwo(size);
     	boolean t = false;
+    	
+    	/*
+    	 * Controllo eccezione in caso di interrupt e poll da una lista vuota
+    	 * */
     	try {
     		queue.poll(0,TimeUnit.DAYS);
     	} catch (Exception e) {
+    		t = true;
+    	}
+    	assertTrue(t);
+    	t = false;
+    	
+    	
+    	/*
+    	 * Controllo eccezione in caso di interrupt e offer su una lista piena.
+    	 * */
+    	for(int i = 0; i <= realSize; i++) {
+    		queue.offer(0, 0, TimeUnit.DAYS);
+    	}
+    	
+    	try {
+    		queue.offer(0, 1, TimeUnit.DAYS);
+    	} catch (InterruptedException e) {
     		t = true;
     	}
     	assertTrue(t);
