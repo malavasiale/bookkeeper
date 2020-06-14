@@ -153,6 +153,34 @@ public class BlockingMpscQueueTest{
     	
     }
     
+    @Test
+    public void testTakeAndPutInterrupt() throws InterruptedException {
+    	int realSize = Pow2.roundToPowerOfTwo(size);
+    	boolean t = false;
+    	Thread.currentThread().interrupt();
+    	
+    	try {
+    		queue.take();
+    	} catch(InterruptedException e) {
+    		t = true;
+    	}
+    	assertTrue(t);
+    	t = false;
+    	
+    	for(int i = 0; i < realSize ; i++) {
+    		queue.put(0);
+    	}
+    	
+    	Thread.currentThread().interrupt();
+    	 try {
+    		 queue.put(0);
+    	 } catch(InterruptedException e) {
+    		 t = true;
+    	 }
+    	 assertTrue(t);
+    	
+    }
+    
     /*
      * Test per il metodo drainTo(Collection c) che serve a trasferire dalla coda gli elementi in una lista.
      * Se la lista non è abbastanza grande arriva a riempirla. Il valore di ritorno è la dimensione della lista
