@@ -241,9 +241,11 @@ public class BlockingMpscQueueTest{
     })
     public void testDrainToLimited(int limit) throws InterruptedException {
     	int realSize = Pow2.roundToPowerOfTwo(size);
-    	
-    	
     	List<Integer> drainLimited = new ArrayList<>();
+    	
+    	/*
+    	 * Test se un numero negativo scelto come limite
+    	 * */
     	if(limit < 0) {
     		boolean t = false;
     		int added = queue.drainTo(drainLimited, limit);
@@ -253,7 +255,7 @@ public class BlockingMpscQueueTest{
     		added = queue.drainTo(drainLimited, limit);
     		assertEquals(limit,added);
     		
-    		queue = null;
+    		drainLimited = null;
     		try {
     			added = queue.drainTo(drainLimited, limit);
     		}catch(NullPointerException e) {
@@ -262,6 +264,122 @@ public class BlockingMpscQueueTest{
     		assertTrue(t);
     	}
     	
+    	/*
+    	 * Test se scelgo zero come limite
+    	 * */
+    	else if(limit == 0) {
+    		boolean t = false;
+    		int added = queue.drainTo(drainLimited, limit);
+    		assertEquals(0,added);
+    		
+    		queue.put(1);
+    		added = queue.drainTo(drainLimited, limit);
+    		assertEquals(0,added);
+    		
+    		drainLimited = null;
+    		try {
+    			added = queue.drainTo(drainLimited, limit);
+    		}catch(NullPointerException e) {
+    			t = true;
+    		}
+    		assertTrue(t);
+    	}
+    	
+    	/*
+    	 * Test se scelgo un valore compreso tra zero e la grandezza della coda
+    	 * come limite.
+    	 * */
+    	else if(limit > 0 && limit <= realSize) {
+    		boolean t = false;
+    		int added = queue.drainTo(drainLimited, limit);
+    		assertEquals(0,added);
+    		
+    		for(int i = 0; i< realSize; i++) {
+        		queue.put(1);
+    		}
+    		added = queue.drainTo(drainLimited, limit);
+    		assertEquals(limit,added);
+    		
+    		drainLimited = null;
+    		try {
+    			added = queue.drainTo(drainLimited, limit);
+    		}catch(NullPointerException e) {
+    			t = true;
+    		}
+    		assertTrue(t);
+    	}
+    	
+    	/*
+    	 * Test se scelgo un numero più grande della
+    	 * lunghezza della coda come limite.
+    	 * */
+    	else if (limit > realSize) {
+    		boolean t = false;
+    		int added = queue.drainTo(drainLimited, limit);
+    		assertEquals(0,added);
+    		
+    		for(int i = 0; i< realSize; i++) {
+        		queue.put(1);
+    		}
+    		added = queue.drainTo(drainLimited, limit);
+    		assertEquals(realSize,added);
+    		
+    		drainLimited = null;
+    		try {
+    			added = queue.drainTo(drainLimited, limit);
+    		}catch(NullPointerException e) {
+    			t = true;
+    		}
+    		assertTrue(t);
+    	}
+    	
+    }
+    
+    /*
+     * Test del metodo per verificare la capacità rimanente della coda.
+     * Category partition:
+     * 1. BlockingMpscQueue : {vuota, con alcuni elementi, piena, null}
+     * */
+    @Test
+    public void testRemainingCapacity() throws InterruptedException {
+    	int realSize = Pow2.roundToPowerOfTwo(size);
+    	boolean t = false;
+    	
+    	/*
+    	 * Testo la capacità rimanente sulla coda vuota
+    	 * */
+    	int remaining = queue.remainingCapacity();
+    	assertEquals(remaining,realSize);
+    	
+    	/*
+    	 * Riempo in parte la coda e testo la capacità rimanente
+    	 * */
+    	for(int i = 0; i < realSize/2; i++) {
+    		queue.put(i);
+    	}
+    	remaining = queue.remainingCapacity();
+    	assertEquals(realSize/2,remaining);
+    	
+    	/*
+    	 * Riempo completamente la coda e testo la capacità rimanente
+    	 * */
+    	for(int i = 0; i < realSize/2; i++) {
+    		queue.put(i);
+    	}
+    	remaining = queue.remainingCapacity();
+    	assertEquals(0,remaining);
+    	
+    	
+    	/*
+    	 * Test capacità se la coda è null
+    	 * */
+    	queue = null;
+    	try {
+    		remaining = queue.remainingCapacity();
+    	}catch(NullPointerException e) {
+    		t = true;
+    	}
+    	assertTrue(t);
     }
     
 }
