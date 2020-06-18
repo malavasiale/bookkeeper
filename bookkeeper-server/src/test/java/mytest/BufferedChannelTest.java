@@ -111,6 +111,26 @@ public class BufferedChannelTest {
 		}
 	}
 	
+	/*
+	 * Test per verificare la lettura dal Channel se ci sono bytes presenti.
+	 * Category Partition:
+	 * 1. ByteBuf dest : {valido , con capacità minore dei byte che voglio leggere , null}
+	 * 2. int pos : {<0 ; 0 ; 0 < x < maxLen ; > maxLen}
+	 * 3. int length : {<0 ; 0 ; 0 < x < maxLen ; > maxLen}
+	 * */
+	@Test
+	@Parameters({
+		"40,0,20"
+	})
+	public void testRead(int bufLen,int pos, int length) throws Exception {
+		
+		bufferedChannel = createBuffer(bufLen,0);
+		buffer = generateEntry(20);
+		bufferedChannel.write(buffer);
+		ByteBuf dest = Unpooled.buffer();
+		
+		assertEquals(20,bufferedChannel.read(dest, 0, 20));
+	}
 
 
 	public static BufferedChannel createBuffer(int capacity,  long unpersistedBytesBound) throws Exception {
