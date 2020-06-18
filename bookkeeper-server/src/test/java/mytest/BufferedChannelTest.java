@@ -120,7 +120,9 @@ public class BufferedChannelTest {
 	 * */
 	@Test
 	@Parameters({
-		"40,0,20"
+		"40,0,20",
+		"40,10,10",
+		"40,10,0"
 	})
 	public void testRead(int bufLen,int pos, int length) throws Exception {
 		
