@@ -59,9 +59,11 @@ public class BufferedChannelTest {
 		"40,41,30", // capacity > 0 ; Bound > capacity : length < capacity && length < unpersistedBytesBound
 		"40,30,35", // capacity > 0 ; Bound <= capacity ; Bound < length < capacity
 		"40,50,45", // capacity > 0 ; Bound > capacity ; capacity < length < Bound
-		"40,10,51", // capacity > 0 ; Bound < capacity ; length > capacity && length > Bound
-		"40,0,10", //  capacity > 0 ; Bound = 0; Bound < length < capacity
-		"0,0,1" //  capacity <= 0 ; Bound = 0; Bound < length < capacity
+		"40,10,51", // capacity > 0 ; Bound <= capacity ; length > capacity && length > Bound
+		"40,0,10", //  capacity > 0 ; Bound <= 0; Bound < length < capacity
+		"0,0,1", //  capacity <= 0 ; Bound <= 0; Bound < length < capacity ----> BUG con capacità nulla
+		"40,10,0" //  capacity > 0 ; Bound <= capacity; length <= 0
+		
     })
 	public void testWrite(int capacity,long unpersistedBytesBound,int length) throws Exception {
 		
@@ -82,13 +84,15 @@ public class BufferedChannelTest {
 			else {
 				assertEquals(0,bufferedChannel.getNumOfBytesInWriteBuffer());
 				assertEquals(length,bufferedChannel.size());
-			}	
+			}
+			return;
 		}
 		
 		//Bytes rimangono nel buffer
 		if(length < unpersistedBytesBound && length < capacity) {
 			assertEquals(length,bufferedChannel.getNumOfBytesInWriteBuffer());
 			assertEquals(0,bufferedChannel.size());
+			return;
 		}
 		
 		//Bytes che voglio scrivere sono più della lunghezza del buffer
@@ -103,6 +107,7 @@ public class BufferedChannelTest {
 				assertEquals(0,bufferedChannel.getNumOfBytesInWriteBuffer());
 				assertEquals(length,bufferedChannel.size());
 			}
+			return;
 		}
 	}
 
