@@ -888,6 +888,7 @@
           <reuseForks>false</reuseForks>
           <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
           <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+          <testFailureIgnore>true</testFailureIgnore>
         </configuration>
       </plugin>
       <plugin>
