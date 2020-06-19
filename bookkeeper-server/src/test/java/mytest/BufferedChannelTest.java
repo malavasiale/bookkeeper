@@ -2,21 +2,17 @@ package mytest;
 
 
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.TestTimedOutException;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -24,7 +20,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import junitparams.JUnitParamsRunner;
 
 import org.apache.bookkeeper.bookie.BufferedChannel;
 
@@ -114,24 +109,39 @@ public class BufferedChannelTest {
 	/*
 	 * Test per verificare la lettura dal Channel se ci sono bytes presenti.
 	 * Category Partition:
-	 * 1. ByteBuf dest : {valido , con capacità minore dei byte che voglio leggere , null}
-	 * 2. int pos : {<0 ; 0 ; 0 < x < maxLen ; > maxLen}
-	 * 3. int length : {<0 ; 0 ; 0 < x < maxLen ; > maxLen}
+	 * 1. int maxLen : {> 0; <= 0}
+	 * 2. int pos : {<0 ; 0 ; 0 < x <= maxLen ; > maxLen}
+	 * 3. int length : {<0 ; 0 ; 0 < x <= |maxLen-pos| ; > |maxLen-pos|}
 	 * */
 	@Test
 	@Parameters({
-		"40,0,20",
-		"40,10,10",
-		"40,10,0"
+		"40,0,20,20,false", //maxLen > 0; pos = 0 ; 0 < length <= |maxLen-pos|
+		"40,30,20,0,true", //maxLen > 0; 0 < pos <= maxLen ; 0 < length <= |maxLen-pos|
+		"40,10,0,0,false", // maxLen > 0 ; 0 < pos <= maxLen ; length = 0
+		"20,30,10,10,false", // maxLen > 0 ; pos > maxLen ; 0 < length <= |maxLen-pos|
+		"40,-1,10,0,true", // maxLen > 0 ; pos < 0 ; 0 < length <= |maxLen-pos|
+		"40,20,30,0,true",  // maxLen > 0 ; 0 < pos <= maxLen ; length > |maxLen-pos|
+		"40,20,-1,0,true" // maxLen > 0 ; 0 < pos <= maxLen ; length > |maxLen-pos|
 	})
-	public void testRead(int bufLen,int pos, int length) throws Exception {
-		
-		bufferedChannel = createBuffer(bufLen,0);
-		buffer = generateEntry(20);
+	public void testRead(int maxLen,int pos, int length,Integer expectedResult,boolean exception) throws Exception {
+		Integer result;
+		bufferedChannel = createBuffer(maxLen,0); // Lo creo in modo che non faccia flush()
+		buffer = generateEntry(40);
 		bufferedChannel.write(buffer);
-		ByteBuf dest = Unpooled.buffer();
+
 		
-		assertEquals(20,bufferedChannel.read(dest, 0, 20));
+		try {
+			ByteBuf dest = Unpooled.buffer(length); //Creo un buffer dest
+			result = bufferedChannel.read(dest, pos, length);
+		} catch(IOException e1) {
+			assertTrue(exception);
+			return;
+		}catch(IllegalArgumentException e2) {
+			assertTrue(exception);
+			return;
+		}
+		assertEquals(expectedResult,result);
+		
 	}
 
 
