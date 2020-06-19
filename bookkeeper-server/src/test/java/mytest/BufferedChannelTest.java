@@ -41,69 +41,37 @@ public class BufferedChannelTest {
 	 * una volta raggiunto il limite massimo consentito di byte non persistenti(unpersistedBytesBound)
 	 * o la capacità massima.
 	 * Category partition :
-	 * capacity: {<= 0 ; > 0}
-	 * unpersistedBytesBound : {<= 0 ;0 < x <= capacity ; > capacity}
-	 * lenght : {<= 0 ; = capacity && = unpersistedBytesBound ; < unpersistedBytesBound && < capacity ;
+	 * 1. capacity: {<= 0 ; > 0}
+	 * 2. unpersistedBytesBound : {<= 0 ;0 < x <= capacity ; > capacity}
+	 * 3. lenght : {<= 0 ; = capacity && = unpersistedBytesBound ; < unpersistedBytesBound && < capacity ;
 	 * 			unpersistedBytesBound < x < capacity ; capacity < x < unpersistedBytesBound ;
 	 * 			 > capacity && > unpersistedBytesBound} 
+	 * Metodo unidimensionale
 	 * */
 	@Test(timeout = 5000)
 	@Parameters({
-        "40,40,40", // capacity > 0 ; Bound <= capacity : length = capacity && length = unpersistedBytesBound
-		"40,40,30", // capacity > 0 ; Bound <= capacity : length < capacity && length < unpersistedBytesBound
-		"40,41,30", // capacity > 0 ; Bound > capacity : length < capacity && length < unpersistedBytesBound
-		"40,30,35", // capacity > 0 ; Bound <= capacity ; Bound < length < capacity
-		"40,50,45", // capacity > 0 ; Bound > capacity ; capacity < length < Bound
-		"40,10,51", // capacity > 0 ; Bound <= capacity ; length > capacity && length > Bound
-		"40,0,10", //  capacity > 0 ; Bound <= 0; Bound < length < capacity
-		"0,0,1", //  capacity <= 0 ; Bound <= 0; Bound < length < capacity ----> BUG con capacità nulla
-		"40,10,0" //  capacity > 0 ; Bound <= capacity; length <= 0
+        "40,40,40,0,40", // capacity > 0 ; Bound <= capacity : length = capacity && length = unpersistedBytesBound
+		"40,40,30,30,0", // capacity > 0 ; Bound <= capacity : length < capacity && length < unpersistedBytesBound
+		"40,41,30,30,0", // capacity > 0 ; Bound > capacity : length < capacity && length < unpersistedBytesBound
+		"40,30,35,0,35", // capacity > 0 ; Bound <= capacity ; Bound < length < capacity
+		"40,50,45,5,40", // capacity > 0 ; Bound > capacity ; capacity < length < Bound
+		"40,10,51,0,51", // capacity > 0 ; Bound <= capacity ; length > capacity && length > Bound
+		"40,0,10,10,0", //  capacity > 0 ; Bound <= 0; Bound < length < capacity
+		"0,0,1,0,0", //  capacity <= 0 ; Bound <= 0; Bound < length < capacity ----> BUG con capacità nulla
+		"40,10,0,0,0" //  capacity > 0 ; Bound <= capacity; length <= 0
 		
     })
-	public void testWrite(int capacity,long unpersistedBytesBound,int length) throws Exception {
+	public void testWrite(int capacity,long unpersistedBytesBound,int length, int expectedInBuffer,int expectedInFile) throws Exception {
 		
 		bufferedChannel = createBuffer(capacity,unpersistedBytesBound);
 		buffer = generateEntry(length);
 		bufferedChannel.write(buffer);
 		
+		assertEquals(expectedInBuffer,bufferedChannel.getNumOfBytesInWriteBuffer());
+		assertEquals(expectedInFile,bufferedChannel.size());
 		
-		//Flush in memoria
-		if(length >= unpersistedBytesBound && length < capacity) {
-			
-			//Se è <= 0 allora non c'è limite di Byte non persistenti
-			if(unpersistedBytesBound == 0) {
-				assertEquals(length,bufferedChannel.getNumOfBytesInWriteBuffer());
-				assertEquals(0,bufferedChannel.size());
-			}
-			//Se diverso da 0 allora viene fatto il flush
-			else {
-				assertEquals(0,bufferedChannel.getNumOfBytesInWriteBuffer());
-				assertEquals(length,bufferedChannel.size());
-			}
-			return;
-		}
 		
-		//Bytes rimangono nel buffer
-		if(length < unpersistedBytesBound && length < capacity) {
-			assertEquals(length,bufferedChannel.getNumOfBytesInWriteBuffer());
-			assertEquals(0,bufferedChannel.size());
-			return;
-		}
 		
-		//Bytes che voglio scrivere sono più della lunghezza del buffer
-		if(length > capacity) {
-			int overflow = length % capacity;
-			int flushed = length - overflow;
-			if(overflow < unpersistedBytesBound) {
-				assertEquals(overflow,bufferedChannel.getNumOfBytesInWriteBuffer());
-				assertEquals(flushed,bufferedChannel.size());
-			}
-			else {
-				assertEquals(0,bufferedChannel.getNumOfBytesInWriteBuffer());
-				assertEquals(length,bufferedChannel.size());
-			}
-			return;
-		}
 	}
 	
 	/*
@@ -112,6 +80,7 @@ public class BufferedChannelTest {
 	 * 1. int maxLen : {> 0; <= 0}
 	 * 2. int pos : {<0 ; 0 ; 0 < x <= maxLen ; > maxLen}
 	 * 3. int length : {<0 ; 0 ; 0 < x <= |maxLen-pos| ; > |maxLen-pos|}
+	 * Metodo unidimensionale
 	 * */
 	@Test
 	@Parameters({
@@ -121,7 +90,9 @@ public class BufferedChannelTest {
 		"20,30,10,10,false", // maxLen > 0 ; pos > maxLen ; 0 < length <= |maxLen-pos|
 		"40,-1,10,0,true", // maxLen > 0 ; pos < 0 ; 0 < length <= |maxLen-pos|
 		"40,20,30,0,true",  // maxLen > 0 ; 0 < pos <= maxLen ; length > |maxLen-pos|
-		"40,20,-1,0,true" // maxLen > 0 ; 0 < pos <= maxLen ; length > |maxLen-pos|
+		"40,20,-1,0,true", // maxLen > 0 ; 0 < pos <= maxLen ; length < 0
+		"40,50,1,0,true", // maxLen > 0 ; pos > maxLen ; 0 < length <= |maxLen-pos|  FOR COVERAGE
+		"20,10,1,1,false" // maxLen > 0 ; 0 < pos <= |maxLen-pos|  ; 0 < length <= |maxLen-pos|  FOR COVERAGE
 	})
 	public void testRead(int maxLen,int pos, int length,Integer expectedResult,boolean exception) throws Exception {
 		Integer result;
