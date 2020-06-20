@@ -124,9 +124,18 @@ public class BufferedChannelTest {
 		BufferedChannel bufferedChannel = new BufferedChannel(allocator, fileChannel,
 				10, 0);
 		
+		boolean t = false;
 		ByteBuf dest = Unpooled.buffer(10); //Creo un buffer dest
 		int result = bufferedChannel.read(dest, 0, 10);
 		assertEquals(0,result);
+		
+		try {
+			result = bufferedChannel.read(dest, -1, 10);
+		} catch (IllegalArgumentException e) {
+			t = true;
+		}
+
+		assertTrue(t);
 	}
 
 
