@@ -88,7 +88,7 @@ public class BufferedChannelTest {
 		"40,20,-1,0,true", // maxLen > 0 ; 0 < pos <= maxLen ; length < 0
 		"40,50,1,0,true", // maxLen > 0 ; pos > maxLen ; 0 < length <= |maxLen-pos|  FOR COVERAGE
 		"50,0,20,20,false", // maxLen > 0 ; 0 < pos <= maxLen; 0 < length <= |maxLen-pos|  FOR COVERAGE
-		"30,41,20,0,true", // maxLen > 0 ; 0 < pos <= maxLen; 0 < length <= |maxLen-pos|  FOR COVERAGE
+		"30,40,20,0,true", // maxLen > 0 ; pos > maxLen ; length > |maxLen-pos|  FOR COVERAGE
 	})
 	public void testRead(int maxLen,int pos, int length,Integer expectedResult,boolean exception) throws Exception {
 		Integer result;
