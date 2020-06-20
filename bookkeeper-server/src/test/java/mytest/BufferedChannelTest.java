@@ -13,6 +13,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -29,12 +30,6 @@ public class BufferedChannelTest {
 	
 	private BufferedChannel bufferedChannel;
 	private ByteBuf buffer;
-
-	@After
-	public void close() throws IOException {
-		bufferedChannel.close();
-	}
-	
 	
 	/*
 	 * Test per controllare la corretta scrittura nel buffer e il corretto flush
@@ -92,7 +87,6 @@ public class BufferedChannelTest {
 		"40,20,30,0,true",  // maxLen > 0 ; 0 < pos <= maxLen ; length > |maxLen-pos|
 		"40,20,-1,0,true", // maxLen > 0 ; 0 < pos <= maxLen ; length < 0
 		"40,50,1,0,true", // maxLen > 0 ; pos > maxLen ; 0 < length <= |maxLen-pos|  FOR COVERAGE
-		"20,10,1,1,false" // maxLen > 0 ; 0 < pos <= |maxLen-pos|  ; 0 < length <= |maxLen-pos|  FOR COVERAGE
 	})
 	public void testRead(int maxLen,int pos, int length,Integer expectedResult,boolean exception) throws Exception {
 		Integer result;
@@ -113,6 +107,25 @@ public class BufferedChannelTest {
 		}
 		assertEquals(expectedResult,result);
 		
+	}
+	
+	@Test
+	public void testNullWriteBuffer() throws IOException {
+		
+		ByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
+		File newLogFile = File.createTempFile("test", "log");
+		newLogFile.deleteOnExit();
+		
+		FileChannel fileChannel = new RandomAccessFile(newLogFile, "rw").getChannel();
+		allocator = Mockito.spy(ByteBufAllocator.class);
+		Mockito.when(allocator.directBuffer(10)).thenReturn(null);
+		
+		BufferedChannel bufferedChannel = new BufferedChannel(allocator, fileChannel,
+				10, 0);
+		
+		ByteBuf dest = Unpooled.buffer(10); //Creo un buffer dest
+		int result = bufferedChannel.read(dest, 0, 10);
+		assertEquals(0,result);
 	}
 
 
