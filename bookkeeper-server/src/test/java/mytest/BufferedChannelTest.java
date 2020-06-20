@@ -95,7 +95,6 @@ public class BufferedChannelTest {
 		bufferedChannel = createBuffer(maxLen,0); // Lo creo in modo che non faccia flush()
 		buffer = generateEntry(40);
 		bufferedChannel.write(buffer);
-
 		
 		try {
 			ByteBuf dest = Unpooled.buffer(length); //Creo un buffer dest
