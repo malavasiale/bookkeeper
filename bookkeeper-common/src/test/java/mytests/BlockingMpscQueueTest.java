@@ -19,6 +19,17 @@ import org.junit.runner.RunWith;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
+
+/*
+ * MUTATION 53 & 96 equivalenti al SUT. Infatti sostituire > con >= nella seguente condizione if (System.nanoTime() > absoluteEndTime) 
+ * non porta a nessun cambiamento nell esecuzione dei metodi in quanto i il tempo preso da System.nanoTime ad un determinato
+ * ciclo diventerà maggiore di absoluteEndTime, e nel raro caso diventi esattamente uguale, vuol dire semplicemente che sarà effettuato un ciclo
+ * in più -----> WEAK MUTATION
+ * 
+ * MUTATION 40 & 71. Non si riesce ad uccidere le mutazione che negano la condizione Thread.interrupted().Questo perchè quando la condizoine è
+ * vera viene lanciata un InterruptedException di cui viene effettuato il catch nei test, ma negandola il test viene mandato in timeout da pit 
+ * a causa di un loop infinito e la mutazione considerata SURVIVED!
+ * */
 @RunWith(JUnitParamsRunner.class)
 public class BlockingMpscQueueTest{
 	
@@ -47,7 +58,7 @@ public class BlockingMpscQueueTest{
 	 * Approccio unidimensionale : ogni input almeno una volta altrimenti tutte le combinazioni con l'enum
 	 * sarebbero troppe. Oltreutto non posso mettere un timeout di giorni per un test!
 	 * */
-    @Test
+    @Test(timeout = 2500) //Kill MUTATION 53 E 96 TIMED_OUT 
     @Parameters({
         "1,100,MILLISECONDS",
         "0,1,SECONDS",
@@ -149,37 +160,45 @@ public class BlockingMpscQueueTest{
     	 * Svuoto la coda e controllo che la d
     	 * */
     	for(int i = 0;i < howMany; i++) {
-    		queue.take();
+    		int result =  queue.take();
+    		assertEquals(result,toAdd); //Uccisa MUTATION 104 controllando il valore di ritorno e non solo la size finale
     	}
     	assertEquals(0,queue.size());
     	
     }
-    
-    @Test
+
+    @Test(timeout = 2000)
     public void testTakeAndPutInterrupt() throws InterruptedException {
+    	Thread.currentThread().interrupt();
     	int realSize = Pow2.roundToPowerOfTwo(size);
     	boolean t = false;
-    	Thread.currentThread().interrupt();
     	
+    	/*
+    	 * Controllo eccezione in caso di interrupt e poll da una lista vuota
+    	 * */
     	try {
     		queue.take();
-    	} catch(InterruptedException e) {
+    	} catch (InterruptedException e) {
     		t = true;
     	}
     	assertTrue(t);
     	t = false;
     	
-    	for(int i = 0; i < realSize ; i++) {
-    		queue.put(0);
+    	
+    	/*
+    	 * Controllo eccezione in caso di interrupt e offer su una lista piena.
+    	 * */
+    	for(int i = 0; i < realSize; i++) {
+    		queue.offer(0, 0, TimeUnit.DAYS);
     	}
     	
     	Thread.currentThread().interrupt();
-    	 try {
-    		 queue.put(0);
-    	 } catch(InterruptedException e) {
-    		 t = true;
-    	 }
-    	 assertTrue(t);
+    	try {
+    		queue.put(0);
+    	} catch (InterruptedException e) {
+    		t = true;
+    	}
+    	assertTrue(t);
     	
     }
     
