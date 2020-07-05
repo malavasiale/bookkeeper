@@ -136,6 +136,17 @@ public class BlockingMpscQueueTest{
     }
     
     /*
+     * Test take e put senza thread.interrupted e con timeout FOR COVERAGE
+     * */
+    @Test(timeout = 2000)
+    public void testTakeAndPutTimeout() throws InterruptedException {
+    	queue.take();
+    	
+    	//Non può raggiungere questa parte, scadrà il timeout
+    	fail();
+    }
+    
+    /*
      * Test simile a testOfferAndPoll() ma in questo caso non hanno timeout. In questo caso però
      * non hanno nemmeno una valore di ritorno, di conseguenza testerò la lunghezza della coda
      * per verificare il corretto funzionamento.
