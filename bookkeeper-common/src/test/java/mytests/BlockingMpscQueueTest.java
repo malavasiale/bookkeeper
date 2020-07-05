@@ -138,12 +138,27 @@ public class BlockingMpscQueueTest{
     /*
      * Test take e put senza thread.interrupted e con timeout FOR COVERAGE
      * */
-    @Test(timeout = 2000)
-    public void testTakeAndPutTimeout() throws InterruptedException {
+    @Test(timeout = 1000)
+    public void testTakeTimeout() throws InterruptedException {
     	queue.take();
     	
     	//Non può raggiungere questa parte, scadrà il timeout
     	fail();
+    }
+    
+    /*
+     * Test take e put senza thread.interrupted e con timeout FOR COVERAGE
+     * */
+    @Test(timeout = 1500)
+    public void testPutTimeout() throws InterruptedException {
+    	int realSize = Pow2.roundToPowerOfTwo(size);
+    	for(int i = 0; i < realSize; i++) {
+    		queue.offer(0, 0, TimeUnit.DAYS);
+    	}
+    	 queue.put(0);
+    	 
+    	 // Non verrà mai raggiunto
+    	 fail();
     }
     
     /*
