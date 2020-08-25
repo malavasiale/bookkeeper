@@ -69,7 +69,7 @@
     <dependency>
       <groupId>org.apache.distributedlog</groupId>
       <artifactId>distributedlog-core</artifactId>
-      <version>${project.parent.version}</version>
+      <version>4.11.0</version>
       <classifier>tests</classifier>
     </dependency>
   </dependencies>
