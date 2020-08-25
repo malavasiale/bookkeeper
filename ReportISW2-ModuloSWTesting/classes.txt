@@ -1,0 +1,11 @@
+Apache Tajo - tajo-common
+org.apache.tajo.util.FileUtil.java
+
+Apache Tajo - tajo-core
+org.apache.tajo.util.JSPUtil.java
+
+Apache Bookkeeper - bookkeeper-common
+org.apache.bookkeeper.common.collections.BlockingMpscQueue.java
+
+Apache Bookkeeper - bookkeeper-server
+org.apache.bookkeeper.bookie.BufferedChannel.java
