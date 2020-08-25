@@ -4,8 +4,6 @@ addons:
   sonarcloud:
     organization: "malavasiale"
     token: "8ad4338efb40559edc3b05738691b7bb706175cd"
-install :
-   - mvn -U clean install
 script:
   # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
    - mvn clean package sonar:sonar -Dsonar.projectKey=malavasiale_bookkeeper
