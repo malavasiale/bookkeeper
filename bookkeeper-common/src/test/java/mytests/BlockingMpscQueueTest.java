@@ -35,8 +35,7 @@ public class BlockingMpscQueueTest{
 	
 	static BlockingQueue<Integer> queue;
 	static int size = 7;
-	
-	
+		
 	/*
 	 * Inizializzo la coda prima di ogni test
 	 * ATTENZIONE : dalla documentazione e dal codice notiamo che il costruttore padre di BlockingMpscQueue<T>()
