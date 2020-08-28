@@ -282,7 +282,7 @@ public class BufferedChannel extends BufferedReadChannel implements Closeable {
         return writeBuffer.readableBytes();
     }
 
-    public long getUnpersistedBytes() {
+    long getUnpersistedBytes() {
         return unpersistedBytes.get();
     }
 }

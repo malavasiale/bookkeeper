@@ -30,9 +30,8 @@ public abstract class BufferedChannelBase {
             super("Attempting to access a file channel that has already been closed");
         }
     }
-    
-    //ALE : modificata visibilità!
-    public final FileChannel fileChannel;
+
+    protected final FileChannel fileChannel;
 
     protected BufferedChannelBase(FileChannel fc) {
         this.fileChannel = fc;

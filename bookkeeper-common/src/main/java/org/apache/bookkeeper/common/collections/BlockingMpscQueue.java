@@ -38,7 +38,7 @@ public class BlockingMpscQueue<T> extends MpscArrayQueue<T> implements BlockingQ
         while (!this.relaxedOffer(e)) {
             // Do busy-spin loop
             if (Thread.interrupted()) {
-            	throw new InterruptedException();
+                throw new InterruptedException();
             }
         }
     }
